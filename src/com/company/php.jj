@@ -36,6 +36,7 @@ import java.util.*;
 public  class PHP {
 	private static PHP parser ;
 	private static int linesOfCode = 0;
+	private static int nom = 0;
 
 	public static void main ( String args [ ] ) {
 
@@ -73,6 +74,9 @@ public  class PHP {
 	private static void showMetrics(){
 	    System.out.println("\n\n*********Program Metrics*********\n");
 	    System.out.println("Lines Of Code (LOC): " + linesOfCode + "\n");
+	    System.out.println("Number of Methods (NOM): " + nom + "\n");
+	    System.out.println("Number of multi-lined comments " + PHPTokenManager.comMultiLined + "\n");
+	    System.out.println("Number of single-lined comments " + PHPTokenManager.comSingleLined + "\n");
 	}
 }
 
@@ -80,6 +84,8 @@ PARSER_END(PHP)
 
 TOKEN_MGR_DECLS : {
 	static String HereDocEnd;
+	static int comMultiLined = 0;
+    static int comSingleLined = 0;
 }
 
 <HTML_STATE> TOKEN [IGNORE_CASE]: {
@@ -97,9 +103,9 @@ TOKEN_MGR_DECLS : {
 |	"\t"
 |	"\n"
 |	"\r"
-|	<SLASH_SLASH_COMMENT: "//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
-|	<NUMERAL_COMMENT: "#" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
-|	<SLASH_STAR_COMMENT: "/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">
+|	<SLASH_SLASH_COMMENT: "//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")> {++comSingleLined;}
+|	<NUMERAL_COMMENT: "#" (~["\n","\r"])* ("\n" | "\r" | "\r\n")> {++comSingleLined;}
+|	<SLASH_STAR_COMMENT: "/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/"> {++comMultiLined;}
 }
 
 <DEFAULT> TOKEN :
@@ -412,11 +418,11 @@ void ClassMembers() : {}
 
 void MemberDeclaration() : {}
 {
-	LOOKAHEAD( (<FINAL> | Visibility() | <STATIC> )* <FUNCTION>) (<FINAL> | Visibility() | <STATIC> )* <FUNCTION> ["&"]  <IDENTIFIER> "(" [ParameterList()] ")" CompoundStatement() |
+	LOOKAHEAD( (<FINAL> | Visibility() | <STATIC> )* <FUNCTION>) (<FINAL> | Visibility() | <STATIC> )* <FUNCTION> ["&"]  <IDENTIFIER> "(" [ParameterList()] ")" CompoundStatement() {nom++;}|
 	LOOKAHEAD([Visibility()] <CONST>) [Visibility()] <CONST> <IDENTIFIER> "=" Expression()  EndOfStatement() |
 	(<VAR> | Visibility() | <STATIC> )* <DOLLAR> <VAR_NAME> [ "=" Expression() ] ("," <DOLLAR> <VAR_NAME> [ "=" Expression() ])* EndOfStatement() |
 	<GLOBAL> Variable() ("," Variable())* EndOfStatement() |
-	<ABSTRACT> [Visibility()] [<STATIC>] <FUNCTION> ["&"] <IDENTIFIER> "(" [ParameterList()] ")" EndOfStatement()
+	<ABSTRACT> [Visibility()] [<STATIC>] <FUNCTION> ["&"] <IDENTIFIER> "(" [ParameterList()] ")" EndOfStatement() {nom++;}
 
 }
 
@@ -432,7 +438,7 @@ void InterfaceMembers() : {}
 
 void InterfaceMember() : {}
 {
-	[<ABSTRACT>] <FUNCTION> ["&"]  <IDENTIFIER> "(" [ParameterList()] ")" ["{" "}" ]|
+	[<ABSTRACT>] <FUNCTION> ["&"]  <IDENTIFIER> "(" [ParameterList()] ")" ["{" "}" ] {nom++;}|
 	<DOLLAR> <VAR_NAME> ("," <DOLLAR> <VAR_NAME>)* |
 	<CONST> <IDENTIFIER> "=" Expression()
 }
