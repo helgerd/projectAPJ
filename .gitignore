@@ -31,6 +31,17 @@
 .idea/
 *.iml
 
+
+# JavaCC generated files
+ParseException.java
+PHP.java
+PHPTokenManager.java
+PHPConstants.java
+SimpleCharStream.java
+Token.java
+TokenMgrError.java
+
+
 # mpeltonen/sbt-idea plugin
 .idea_modules/
 

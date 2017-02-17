@@ -62,6 +62,7 @@ public  class PHP {
 		try {
 			parser.PhpPage();
 			System.out.println("PHP Parser Version 0.1Alpha:  PHP program parsed successfully.");
+			showMetrics();
 		}
 		catch(ParseException e) {
 			System.out.println("PHP Parser Version 0.1Alpha:  Encountered errors during parse.");
@@ -69,8 +70,9 @@ public  class PHP {
 		}
 	}
 
-	private void showMetrics(){
-
+	private static void showMetrics(){
+	    System.out.println("\n\n*********Program Metrics*********\n");
+	    System.out.println("Lines Of Code (LOC): " + linesOfCode + "\n");
 	}
 }
 
@@ -266,7 +268,7 @@ TOKEN_MGR_DECLS : {
 |	<THROW: "throw">
 }
 
-<VAR_NAME_STATE> TOKEN : 
+<VAR_NAME_STATE> TOKEN :
 {	<VAR_NAME: <LETTER1> (<LETTER1> | <DIGIT1>)*> : DEFAULT
 |  		<#LETTER1: ["A"-"Z","_","a"-"z"]>
 |  		<#DIGIT1: ["0"-"9"]>
@@ -330,8 +332,8 @@ void TryBlock() : {}
 
 void EndOfStatement() :{}
 {
-	";"  { System.out.println("line " + ++linesOfCode); }
-	 | EmbeddedHtml() { System.out.println("line " + ++linesOfCode); }
+	";" {linesOfCode++; }
+	| EmbeddedHtml() { linesOfCode++; }
 }
 
 void EmbeddedHtml() : {}
