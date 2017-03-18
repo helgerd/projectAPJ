@@ -254,9 +254,9 @@ TOKEN_MGR_DECLS : {
 |	"\t"
 |	"\n"
 |	"\r"
-|	<SLASH_SLASH_COMMENT: "//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
-|	<NUMERAL_COMMENT: "#" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
-|	<SLASH_STAR_COMMENT: "/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">
+|	<SLASH_SLASH_COMMENT: "//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")> {comSingleLined++;}
+|	<NUMERAL_COMMENT: "#" (~["\n","\r"])* ("\n" | "\r" | "\r\n")> {comSingleLined++;}
+|	<SLASH_STAR_COMMENT: "/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/"> {comMultiLined++;}
 }
 
 <DEFAULT> TOKEN :
