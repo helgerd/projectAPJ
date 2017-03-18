@@ -31,74 +31,74 @@ options {
 
 PARSER_BEGIN(PHP)
 
+package com.company;
+
 import java.util.*;
 
-public  class PHP {
-	private static PHP parser;
-	private static int linesOfCode = 0;
+public class PHP {
 
 
-	private static int numQuestionMarks = 0;
-	private static int numAnds = 0;
-	private static int numOr = 0;
-	private static int numXor = 0;
-	private static int numCase = 0;
-	private static int numFor = 0;
-	private static int numCatch = 0;
-	private static int numElseif = 0;
-	private static int numForeach = 0;
-	private static int numIf = 0;
-	private static int numWhile = 0;
+    private static int linesOfCode = 0;
 
-	private static int cyclomaticComplexity = 0;
+    private static int numQuestionMarks = 0;
+    private static int numAnds = 0;
+    private static int numOr = 0;
+    private static int numXor = 0;
+    private static int numCase = 0;
+    private static int numFor = 0;
+    private static int numCatch = 0;
+    private static int numElseif = 0;
+    private static int numForeach = 0;
+    private static int numIf = 0;
+    private static int numWhile = 0;
 
 	private static boolean cl;
-	static int noaInClass;
-	static int nomInClass;
-	static int pubMethCount = 0;
-	static int pubAttrCount = 0;
-	static int locInMet = 0;
-	static boolean functSpotted;
-	static boolean met;
-	static int nom = 0;
-    static int noa = 0;
-    static boolean functDecl;
-    static boolean attrDecl;
+	private static int noaInClass;
+	private static int nomInClass;
+	private static int pubMethCount = 0;
+	private static int pubAttrCount = 0;
+	private static int locInMet = 0;
+	private static boolean functSpotted;
+	private static boolean met;
+	private static int nom = 0;
+    private static int noa = 0;
+    private static boolean functDecl;
+    private static boolean attrDecl;
 
-	public static void main ( String args [ ] ) {
-
-		if(args.length == 0){
-			System.out.println("PHP Parser Version 0.1Alpha:  Reading from standard input . . .");
-			parser = new PHP(System.in);
-		} else if (args.length == 1) {
-			System.out.println("PHP Parser Version 0.1Alpha:  Reading from file " + args[0] + " . . ." );
-			try {
-				parser = new PHP(new java.io.FileInputStream(args[0]));
-			}
-			catch(java.io.FileNotFoundException e){
-				System.out.println("PHP Parser Version 0.1:  File " + args[0] + " not found.");
-				return ;
-			}
-		} else {
-			System.out.println("PHP Parser Version 0.1Alpha:  Usage is one of:");
-			System.out.println("         java PHP < inputfile");
-			System.out.println("OR");
-			System.out.println("         java PHP inputfile");
-			return ;
-		}
-		parser.token_source.SwitchTo(HTML_STATE);
-		try {
-			parser.PhpPage();
-			System.out.println("PHP Parser Version 0.1Alpha:  PHP program parsed successfully.");
-			showMetrics();
-		}
-		catch(ParseException e) {
-			System.out.println("PHP Parser Version 0.1Alpha:  Encountered errors during parse.");
-			System.out.println(e.getMessage());
-		}
-	}
-
-	private static void showMetrics(){
+//	public static void main ( String args [ ] ) {
+//
+//		if(args.length == 0){
+//			System.out.println("PHP Parser Version 0.1Alpha:  Reading from standard input . . .");
+//			parser = new PHP(System.in);
+//		} else if (args.length == 1) {
+//			System.out.println("PHP Parser Version 0.1Alpha:  Reading from file " + args[0] + " . . ." );
+//			try {
+//				parser = new PHP(new java.io.FileInputStream(args[0]));
+//			}
+//			catch(java.io.FileNotFoundException e){
+//				System.out.println("PHP Parser Version 0.1:  File " + args[0] + " not found.");
+//				return ;
+//			}
+//		} else {
+//			System.out.println("PHP Parser Version 0.1Alpha:  Usage is one of:");
+//			System.out.println("         java PHP < inputfile");
+//			System.out.println("OR");
+//			System.out.println("         java PHP inputfile");
+//			return ;
+//		}
+//		parser.token_source.SwitchTo(HTML_STATE);
+//		try {
+//			parser.PhpPage();
+//			System.out.println("PHP Parser Version 0.1Alpha:  PHP program parsed successfully.");
+//			showMetrics();
+//		}
+//		catch(ParseException e) {
+//			System.out.println("PHP Parser Version 0.1Alpha:  Encountered errors during parse.");
+//			System.out.println(e.getMessage());
+//		}
+//	}
+//
+//	private static void showMetrics(){
 //	    System.out.println("\n\n*********Program Metrics*********\n");
 //	    System.out.println("Lines Of Code (LOC): " + linesOfCode + "\n");
 //	    cyclomaticComplexity = numQuestionMarks + numAnds + numOr + numXor + numCase + numFor + numCatch +
@@ -120,11 +120,120 @@ public  class PHP {
 //        System.out.println("Number of single-lined comments " + PHPTokenManager.comSingleLined + "\n");
 //            System.out.println("Number of Methods in a class : " + nomInClass + "\n");
 //        System.out.println("Number of class attributes: " + noaInClass + "\n");
-        System.out.println("Class size: " + getClassSize() + "\n");
-//          System.out.println("Weighted method count (sum of lines of code in all methods declared in a class): " + locInMet + "\n");
-          System.out.println("Class Interface Size (CIS): " + getClassInterfaceSize() + "\n");
+//        System.out.println("Class size: " + getClassSize() + "\n");
+//         System.out.println("Weighted method count (sum of lines of code in all methods declared in a class): " + locInMet + "\n");
+//          System.out.println("Class Interface Size (CIS): " + getClassInterfaceSize() + "\n");
+//
+//	}
 
-	}
+
+    public static int getLinesOfCode() {
+        return linesOfCode;
+    }
+
+    public static int getNumQuestionMarks() {
+        return numQuestionMarks;
+    }
+
+    public static int getNumAnds() {
+        return numAnds;
+    }
+
+    public static int getNumOr() {
+        return numOr;
+    }
+
+    public static int getNumXor() {
+        return numXor;
+    }
+
+    public static int getNumCase() {
+        return numCase;
+    }
+
+    public static int getNumFor() {
+        return numFor;
+    }
+
+    public static int getNumCatch() {
+        return numCatch;
+    }
+
+    public static int getNumElseif() {
+        return numElseif;
+    }
+
+    public static int getNumForeach() {
+        return numForeach;
+    }
+
+    public static int getNumIf() {
+        return numIf;
+    }
+
+    public static int getNumWhile() {
+        return numWhile;
+    }
+
+    public static boolean isCl() {
+        return cl;
+    }
+
+    public static int getNoaInClass() {
+        return noaInClass;
+    }
+
+    public static int getNomInClass() {
+        return nomInClass;
+    }
+
+    public static int getPubMethCount() {
+        return pubMethCount;
+    }
+
+    public static int getPubAttrCount() {
+        return pubAttrCount;
+    }
+
+    public static int getLocInMet() {
+        return locInMet;
+    }
+
+    public static boolean isFunctSpotted() {
+        return functSpotted;
+    }
+
+    public static boolean isMet() {
+        return met;
+    }
+
+    public static int getNom() {
+        return nom;
+    }
+
+    public static int getNoa() {
+        return noa;
+    }
+
+    public static boolean isFunctDecl() {
+        return functDecl;
+    }
+
+    public static boolean isAttrDecl() {
+        return attrDecl;
+    }
+
+    public String getHereDocEnd() {
+        return PHPTokenManager.HereDocEnd;
+    }
+
+    public int getComMultiLined() {
+        return PHPTokenManager.comMultiLined;
+    }
+
+    public int getComSingleLined() {
+        return PHPTokenManager.comSingleLined;
+    }
 
 	private static void setClassTrue(){
 	    cl = true;
@@ -221,14 +330,6 @@ public  class PHP {
     private static void setAttrDeclSpottedFalse(){
             attrDecl = false;
         }
-
-    private static int getClassSize(){
-        return (noaInClass + nomInClass);
-    }
-
-    private static int getClassInterfaceSize(){
-        return (pubMethCount + pubAttrCount);
-    }
 }
 
 PARSER_END(PHP)
@@ -781,7 +882,7 @@ void String() : {}
 
 void DoubleStringLiteral() : {}
 {
-	<DOUBLE_STRING_LITERAL_START> 
+	<DOUBLE_STRING_LITERAL_START>
 	(
 		LOOKAHEAD(2) <DSL_SIMPLE_VAR_START> <DSL_SIMPLE_STRING_VAR_END>
 	|	(
