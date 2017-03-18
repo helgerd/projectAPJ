@@ -37,6 +37,7 @@ public  class PHP {
 	private static PHP parser ;
 	private static int linesOfCode = 0;
 
+
 	private static int numQuestionMarks = 0;
 	private static int numAnds = 0;
 	private static int numOr = 0;
@@ -50,6 +51,15 @@ public  class PHP {
 	private static int numWhile = 0;
 
 	private static int cyclomaticComplexity = 0;
+
+    static int nom = 0;
+	static boolean cl;
+	static int noaInClass;
+	static int nomInClass;
+	static int pubElem;
+	static int locInMet = 0;
+	static boolean functSpotted;
+	static boolean met;
 
 
 	public static void main ( String args [ ] ) {
@@ -87,28 +97,89 @@ public  class PHP {
 
 	private static void showMetrics(){
 	    System.out.println("\n\n*********Program Metrics*********\n");
-	    System.out.println("Lines Of Code (LOC): " + linesOfCode + "\n");
-	    cyclomaticComplexity = numQuestionMarks + numAnds + numOr + numXor + numCase + numFor + numCatch +
-	                           numElseif + numForeach + numIf + numWhile;
-	    System.out.println("Number of Tenary Ifs (?:): " + numQuestionMarks + "\n");
-	    System.out.println("Number of Ands (and + &&): " + numAnds + "\n");
-	    System.out.println("Number of Ors (or + ||): " + numOr + "\n");
-	    System.out.println("Number of Xors (^): " + numXor + "\n");
-	    System.out.println("Number of Cases (case): " + numCase + "\n");
-	    System.out.println("Number of Fors (for): " + numFor + "\n");
-	    System.out.println("Number of Catches (catch): " + numCatch + "\n");
-	    System.out.println("Number of Elseifs (elseif): " + numElseif + "\n");
-        System.out.println("Number of Foreachs (foreach): " + numForeach + "\n");
-        System.out.println("Number of Whiles (while): " + numWhile + "\n");
-        System.out.println("Number of Ifs (if): " + numIf + "\n");
-	    System.out.println("Cyclomatic Complexity: " + cyclomaticComplexity + "\n");
+//	    System.out.println("Lines Of Code (LOC): " + linesOfCode + "\n");
+//	    cyclomaticComplexity = numQuestionMarks + numAnds + numOr + numXor + numCase + numFor + numCatch +
+//	                           numElseif + numForeach + numIf + numWhile;
+//	    System.out.println("Number of Tenary Ifs (?:): " + numQuestionMarks + "\n");
+//	    System.out.println("Number of Ands (and + &&): " + numAnds + "\n");
+//	    System.out.println("Number of Ors (or + ||): " + numOr + "\n");
+//	    System.out.println("Number of Xors (^): " + numXor + "\n");
+//	    System.out.println("Number of Cases (case): " + numCase + "\n");
+//	    System.out.println("Number of Fors (for): " + numFor + "\n");
+//	    System.out.println("Number of Catches (catch): " + numCatch + "\n");
+//	    System.out.println("Number of Elseifs (elseif): " + numElseif + "\n");
+//        System.out.println("Number of Foreachs (foreach): " + numForeach + "\n");
+//        System.out.println("Number of Whiles (while): " + numWhile + "\n");
+//        System.out.println("Number of Ifs (if): " + numIf + "\n");
+//	    System.out.println("Cyclomatic Complexity: " + cyclomaticComplexity + "\n");
+//	    System.out.println("Number of Methods (NOM): " + nom + "\n");
+//        System.out.println("Number of multi-lined comments " + PHPTokenManager.comMultiLined + "\n");
+//        System.out.println("Number of single-lined comments " + PHPTokenManager.comSingleLined + "\n");
+            System.out.println("Number of Methods in a class : " + nomInClass + "\n");
+//        System.out.println("Number of class attributes: " + noaInClass + "\n");
+//        System.out.println("Class size: " + (noaInClass + nomInClass) + "\n");
+          System.out.println("Weighted method count (sum of lines of code in all methods declared in a class): " + locInMet + "\n");
+
 	}
+
+	private static void setClassTrue(){
+	    cl = true;
+	}
+
+	private static void setClassFalse(){
+    	cl = false;
+    }
+
+    private static void setMethodTrue(){
+        if (functSpotted == true){
+            met = true;
+        }
+    }
+
+    private static void setMethodFalse(){
+        met = false;
+        functSpotted = false;
+    }
+
+    private static void increaseNumAttrInClass(){
+
+        if(cl == true){
+            noaInClass++;
+        }
+
+    }
+
+    private static void increaseNumMet(){
+
+            if(cl == true){
+                nomInClass++;
+                functSpotted = true;
+            }
+            else{
+                nom++;
+            }
+
+    }
+
+    private static void increaseLinesOfCode(){
+
+        if(met == true && cl == true){
+            locInMet++;
+        }
+        else{
+            linesOfCode++;
+        }
+
+    }
+
 }
 
 PARSER_END(PHP)
 
 TOKEN_MGR_DECLS : {
 	static String HereDocEnd;
+	static int comMultiLined = 0;
+    static int comSingleLined = 0;
 }
 
 <HTML_STATE> TOKEN [IGNORE_CASE]: {
@@ -361,7 +432,7 @@ void TryBlock() : {}
 
 void EndOfStatement() :{}
 {
-	";" {linesOfCode++; }
+	";" {increaseLinesOfCode(); }
 	| EmbeddedHtml() { linesOfCode++; }
 }
 
@@ -391,7 +462,7 @@ void ExpressionStatement() : {}
 
 void CompoundStatement() : {}
 {
-	"{"
+	"{" {setMethodTrue();}
 	    ( Statement())*
 	"}"
 }
@@ -436,16 +507,16 @@ void ClassDeclaration() : {}
 
 void ClassMembers() : {}
 {
-	"{" (MemberDeclaration() )* "}"
+	"{" {setClassTrue();} (MemberDeclaration() )* "}" {setClassFalse();}
 }
 
 void MemberDeclaration() : {}
 {
-	LOOKAHEAD( (<FINAL> | Visibility() | <STATIC> )* <FUNCTION>) (<FINAL> | Visibility() | <STATIC> )* <FUNCTION> ["&"]  <IDENTIFIER> "(" [ParameterList()] ")" CompoundStatement() |
-	LOOKAHEAD([Visibility()] <CONST>) [Visibility()] <CONST> <IDENTIFIER> "=" Expression()  EndOfStatement() |
-	(<VAR> | Visibility() | <STATIC> )* <DOLLAR> <VAR_NAME> [ "=" Expression() ] ("," <DOLLAR> <VAR_NAME> [ "=" Expression() ])* EndOfStatement() |
-	<GLOBAL> Variable() ("," Variable())* EndOfStatement() |
-	<ABSTRACT> [Visibility()] [<STATIC>] <FUNCTION> ["&"] <IDENTIFIER> "(" [ParameterList()] ")" EndOfStatement()
+	LOOKAHEAD( (<FINAL> | Visibility() | <STATIC> )* <FUNCTION> )(<FINAL> | Visibility() | <STATIC> )* <FUNCTION> ["&"]  <IDENTIFIER> "(" [ParameterList()] ")" {increaseNumMet();} CompoundStatement() {setMethodFalse();}|
+	LOOKAHEAD([Visibility()] <CONST>) [Visibility()] <CONST> <IDENTIFIER> "=" Expression()  EndOfStatement() {increaseNumAttrInClass();}|
+	(<VAR> | Visibility() | <STATIC> )* <DOLLAR> <VAR_NAME> [ "=" Expression() ] ("," <DOLLAR> <VAR_NAME> [ "=" Expression() ])* EndOfStatement() {increaseNumAttrInClass();}|
+	<GLOBAL> Variable() ("," Variable())* EndOfStatement() {increaseNumAttrInClass();}|
+	<ABSTRACT> [Visibility()] [<STATIC>] <FUNCTION> ["&"] <IDENTIFIER> "(" [ParameterList()] ")" {increaseNumMet();} EndOfStatement() {setMethodFalse();}
 
 }
 
@@ -461,7 +532,7 @@ void InterfaceMembers() : {}
 
 void InterfaceMember() : {}
 {
-	[<ABSTRACT>] <FUNCTION> ["&"]  <IDENTIFIER> "(" [ParameterList()] ")" ["{" "}" ]|
+	[<ABSTRACT>] <FUNCTION> ["&"]  <IDENTIFIER> "(" [ParameterList()] ")" ["{" "}" ] {nom++;} |
 	<DOLLAR> <VAR_NAME> ("," <DOLLAR> <VAR_NAME>)* |
 	<CONST> <IDENTIFIER> "=" Expression()
 }
@@ -668,5 +739,5 @@ void DoubleStringLiteral() : {}
 
 void Visibility() : {}
 {
-	<PUBLIC> | <PRIVATE> | <PROTECTED>
+	<PUBLIC> {pubElem++;}| <PRIVATE> | <PROTECTED>
 }
