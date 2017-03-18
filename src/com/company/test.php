@@ -1,42 +1,89 @@
 <?php
+/**
+ * Define MyClass
+ */
+class MyClass
+{
+    // Declare a public constructor
+    public function __construct() { }
 
-  class Foo {
-     public function example() {
-        if ($a == $b) {
-             if ($a1 == $b1) {
-                  fiddle();
-             } elseif ($a2 == $b2) {
-                  fiddle();
-              } else {
-                  fiddle();
-              }
-         } elseif ($c == $d) {
-            while ($c == $d) {
-                  fiddle();
-              }
-          } elseif ($e == $f) {
-             for ($n = 0; $n < $h; $n++) {
-                  fiddle();
-              }
-          } else {
-              switch ($z) {
-                 case 1:
-                      fiddle();
-                      break;
-               case 2:
-                      fiddle();
-                      break;
-                case 3:
-                      fiddle();
-                      break;
-                  default:
-                      fiddle();
-                      break;
-              }
-          }
-      }
+    // Declare a public method
+    public function MyPublic() { }
 
-      public function example(){ print("Hello World"); }
-  }
+    // Declare a protected method
+    protected function MyProtected() { }
 
+    // Declare a private method
+    private function MyPrivate() { }
+
+    // This is public
+    function Foo()
+    {
+        $this->MyPublic();
+        $this->MyProtected();
+        $this->MyPrivate();
+    }
+}
+
+$myclass = new MyClass;
+$myclass->MyPublic(); // Works
+$myclass->MyProtected(); // Fatal Error
+$myclass->MyPrivate(); // Fatal Error
+$myclass->Foo(); // Public, Protected and Private work
+
+
+/**
+ * Define MyClass2
+ */
+class MyClass2 extends MyClass
+{
+    // This is public
+    function Foo2()
+    {
+        $this->MyPublic();
+        $this->MyProtected();
+        $this->MyPrivate(); // Fatal Error
+    }
+}
+
+class foo {
+    var $bar = 'I am bar.';
+    var $arr = array('I am A.', 'I am B.', 'I am C.');
+    var $r   = 'I am r.';
+}
+
+$myclass2 = new MyClass2;
+$myclass2->MyPublic(); // Works
+$myclass2->Foo2(); // Public and Protected work, not Private
+
+class Bar 
+{
+    public function test() {
+        $this->testPrivate();
+        $this->testPublic();
+    }
+
+    public function testPublic() {
+        echo "Bar::testPublic\n";
+    }
+    
+    private function testPrivate() {
+        echo "Bar::testPrivate\n";
+    }
+}
+
+class Foo extends Bar 
+{
+    public function testPublic() {
+        echo "Foo::testPublic\n";
+    }
+    
+    private function testPrivate() {
+        echo "Foo::testPrivate\n";
+    }
+}
+
+$myFoo = new Foo();
+$myFoo->test(); // Bar::testPrivate 
+                // Foo::testPublic
 ?>

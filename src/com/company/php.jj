@@ -34,7 +34,7 @@ PARSER_BEGIN(PHP)
 import java.util.*;
 
 public  class PHP {
-	private static PHP parser ;
+	private static PHP parser;
 	private static int linesOfCode = 0;
 
 
@@ -52,15 +52,18 @@ public  class PHP {
 
 	private static int cyclomaticComplexity = 0;
 
-    static int nom = 0;
-	static boolean cl;
+	private static boolean cl;
 	static int noaInClass;
 	static int nomInClass;
-	static int pubElem;
+	static int pubMethCount = 0;
+	static int pubAttrCount = 0;
 	static int locInMet = 0;
 	static boolean functSpotted;
 	static boolean met;
-
+	static int nom = 0;
+    static int noa = 0;
+    static boolean functDecl;
+    static boolean attrDecl;
 
 	public static void main ( String args [ ] ) {
 
@@ -96,7 +99,7 @@ public  class PHP {
 	}
 
 	private static void showMetrics(){
-	    System.out.println("\n\n*********Program Metrics*********\n");
+//	    System.out.println("\n\n*********Program Metrics*********\n");
 //	    System.out.println("Lines Of Code (LOC): " + linesOfCode + "\n");
 //	    cyclomaticComplexity = numQuestionMarks + numAnds + numOr + numXor + numCase + numFor + numCatch +
 //	                           numElseif + numForeach + numIf + numWhile;
@@ -115,10 +118,13 @@ public  class PHP {
 //	    System.out.println("Number of Methods (NOM): " + nom + "\n");
 //        System.out.println("Number of multi-lined comments " + PHPTokenManager.comMultiLined + "\n");
 //        System.out.println("Number of single-lined comments " + PHPTokenManager.comSingleLined + "\n");
-            System.out.println("Number of Methods in a class : " + nomInClass + "\n");
+//            System.out.println("Number of Methods in a class : " + nomInClass + "\n");
 //        System.out.println("Number of class attributes: " + noaInClass + "\n");
 //        System.out.println("Class size: " + (noaInClass + nomInClass) + "\n");
-          System.out.println("Weighted method count (sum of lines of code in all methods declared in a class): " + locInMet + "\n");
+//          System.out.println("Weighted method count (sum of lines of code in all methods declared in a class): " + locInMet + "\n");
+//          System.out.println("Public method count  " + pubMethCount + "\n");
+//          System.out.println("Public attr count  " + pubAttrCount + "\n");
+//          System.out.println("Class Interface Size (CIS): " + (pubMethCount + pubAttrCount) + "\n");
 
 	}
 
@@ -130,30 +136,36 @@ public  class PHP {
     	cl = false;
     }
 
-    private static void setMethodTrue(){
+    private static void setInsideMethodTrue(){
         if (functSpotted == true){
             met = true;
         }
     }
 
-    private static void setMethodFalse(){
+    private static void setInsideMethodFalse(){
         met = false;
-        functSpotted = false;
+        setFunctDeclSpottedFalse();
     }
 
-    private static void increaseNumAttrInClass(){
+    private static void increaseNumAttrInClass(boolean publ){
 
         if(cl == true){
             noaInClass++;
+
+            if(publ == true){
+                pubAttrCount++;
+            }
         }
 
     }
 
-    private static void increaseNumMet(){
+    private static void increaseNumMet(boolean publ){
 
             if(cl == true){
                 nomInClass++;
-                functSpotted = true;
+                if(publ == true){
+                    pubMethCount++;
+                }
             }
             else{
                 nom++;
@@ -171,6 +183,46 @@ public  class PHP {
         }
 
     }
+
+    private static void setFunctDeclSpottedTrue(){
+
+        functDecl = true;
+
+        functSpotted = true;
+
+    }
+
+    private static void setFunctDeclSpottedFalse(){
+
+         functSpotted = false;
+
+    }
+
+    private static void increasePubElemCount(){
+
+        if(functDecl == true){
+
+            increaseNumMet(true);
+        }
+
+        else if(attrDecl == true){
+
+            increaseNumAttrInClass(true);
+        }
+
+    }
+
+    private static void setFunctDeclEnd(){
+        functDecl = false;
+    }
+
+    private static void setAttrDeclSpottedTrue(){
+             attrDecl = true;
+         }
+
+    private static void setAttrDeclSpottedFalse(){
+            attrDecl = false;
+        }
 
 }
 
@@ -462,7 +514,7 @@ void ExpressionStatement() : {}
 
 void CompoundStatement() : {}
 {
-	"{" {setMethodTrue();}
+	"{" {setInsideMethodTrue();}
 	    ( Statement())*
 	"}"
 }
@@ -512,11 +564,12 @@ void ClassMembers() : {}
 
 void MemberDeclaration() : {}
 {
-	LOOKAHEAD( (<FINAL> | Visibility() | <STATIC> )* <FUNCTION> )(<FINAL> | Visibility() | <STATIC> )* <FUNCTION> ["&"]  <IDENTIFIER> "(" [ParameterList()] ")" {increaseNumMet();} CompoundStatement() {setMethodFalse();}|
-	LOOKAHEAD([Visibility()] <CONST>) [Visibility()] <CONST> <IDENTIFIER> "=" Expression()  EndOfStatement() {increaseNumAttrInClass();}|
-	(<VAR> | Visibility() | <STATIC> )* <DOLLAR> <VAR_NAME> [ "=" Expression() ] ("," <DOLLAR> <VAR_NAME> [ "=" Expression() ])* EndOfStatement() {increaseNumAttrInClass();}|
-	<GLOBAL> Variable() ("," Variable())* EndOfStatement() {increaseNumAttrInClass();}|
-	<ABSTRACT> [Visibility()] [<STATIC>] <FUNCTION> ["&"] <IDENTIFIER> "(" [ParameterList()] ")" {increaseNumMet();} EndOfStatement() {setMethodFalse();}
+	LOOKAHEAD( (<FINAL> | Visibility() | <STATIC> )* <FUNCTION> ) {setFunctDeclSpottedTrue();} (<FINAL> | Visibility() | <STATIC> )* <FUNCTION>  ["&"]  <IDENTIFIER> "(" [ParameterList()] ")" {setFunctDeclEnd(); increaseNumMet(false);} CompoundStatement() {setInsideMethodFalse();}|
+	LOOKAHEAD([Visibility()] <CONST>) {setAttrDeclSpottedTrue();} [Visibility()] <CONST> <IDENTIFIER> "=" Expression()  EndOfStatement() {setAttrDeclSpottedFalse(); increaseNumAttrInClass(false);}|
+	(<VAR> {setAttrDeclSpottedTrue(); pubAttrCount++;} | Visibility() | <STATIC> )* <DOLLAR>  <VAR_NAME>  [ "=" Expression() ] ("," <DOLLAR>
+	 <VAR_NAME> [ "=" Expression() ])* EndOfStatement() {setAttrDeclSpottedFalse(); increaseNumAttrInClass(false);}|
+	<GLOBAL> Variable() ("," Variable())* EndOfStatement() {increaseNumAttrInClass(false);}|
+	<ABSTRACT> [Visibility()] [<STATIC>] <FUNCTION> {setFunctDeclSpottedTrue();}["&"] <IDENTIFIER> "(" [ParameterList()] ")" {setFunctDeclEnd(); increaseNumMet(false);} EndOfStatement() {setInsideMethodFalse();}
 
 }
 
@@ -739,5 +792,5 @@ void DoubleStringLiteral() : {}
 
 void Visibility() : {}
 {
-	<PUBLIC> {pubElem++;}| <PRIVATE> | <PROTECTED>
+	<PUBLIC> {increasePubElemCount();}| <PRIVATE> | <PROTECTED>
 }
