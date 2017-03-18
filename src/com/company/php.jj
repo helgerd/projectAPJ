@@ -120,11 +120,9 @@ public  class PHP {
 //        System.out.println("Number of single-lined comments " + PHPTokenManager.comSingleLined + "\n");
 //            System.out.println("Number of Methods in a class : " + nomInClass + "\n");
 //        System.out.println("Number of class attributes: " + noaInClass + "\n");
-//        System.out.println("Class size: " + (noaInClass + nomInClass) + "\n");
+        System.out.println("Class size: " + getClassSize() + "\n");
 //          System.out.println("Weighted method count (sum of lines of code in all methods declared in a class): " + locInMet + "\n");
-//          System.out.println("Public method count  " + pubMethCount + "\n");
-//          System.out.println("Public attr count  " + pubAttrCount + "\n");
-//          System.out.println("Class Interface Size (CIS): " + (pubMethCount + pubAttrCount) + "\n");
+          System.out.println("Class Interface Size (CIS): " + getClassInterfaceSize() + "\n");
 
 	}
 
@@ -224,6 +222,13 @@ public  class PHP {
             attrDecl = false;
         }
 
+    private static int getClassSize(){
+        return (noaInClass + nomInClass);
+    }
+
+    private static int getClassInterfaceSize(){
+        return (pubMethCount + pubAttrCount);
+    }
 }
 
 PARSER_END(PHP)
