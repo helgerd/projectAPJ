@@ -36,7 +36,21 @@ import java.util.*;
 public  class PHP {
 	private static PHP parser ;
 	private static int linesOfCode = 0;
-	private static int nom = 0;
+
+	private static int numQuestionMarks = 0;
+	private static int numAnds = 0;
+	private static int numOr = 0;
+	private static int numXor = 0;
+	private static int numCase = 0;
+	private static int numFor = 0;
+	private static int numCatch = 0;
+	private static int numElseif = 0;
+	private static int numForeach = 0;
+	private static int numIf = 0;
+	private static int numWhile = 0;
+
+	private static int cyclomaticComplexity = 0;
+
 
 	public static void main ( String args [ ] ) {
 
@@ -74,9 +88,20 @@ public  class PHP {
 	private static void showMetrics(){
 	    System.out.println("\n\n*********Program Metrics*********\n");
 	    System.out.println("Lines Of Code (LOC): " + linesOfCode + "\n");
-	    System.out.println("Number of Methods (NOM): " + nom + "\n");
-	    System.out.println("Number of multi-lined comments " + PHPTokenManager.comMultiLined + "\n");
-	    System.out.println("Number of single-lined comments " + PHPTokenManager.comSingleLined + "\n");
+	    cyclomaticComplexity = numQuestionMarks + numAnds + numOr + numXor + numCase + numFor + numCatch +
+	                           numElseif + numForeach + numIf + numWhile;
+	    System.out.println("Number of Tenary Ifs (?:): " + numQuestionMarks + "\n");
+	    System.out.println("Number of Ands (and + &&): " + numAnds + "\n");
+	    System.out.println("Number of Ors (or + ||): " + numOr + "\n");
+	    System.out.println("Number of Xors (^): " + numXor + "\n");
+	    System.out.println("Number of Cases (case): " + numCase + "\n");
+	    System.out.println("Number of Fors (for): " + numFor + "\n");
+	    System.out.println("Number of Catches (catch): " + numCatch + "\n");
+	    System.out.println("Number of Elseifs (elseif): " + numElseif + "\n");
+        System.out.println("Number of Foreachs (foreach): " + numForeach + "\n");
+        System.out.println("Number of Whiles (while): " + numWhile + "\n");
+        System.out.println("Number of Ifs (if): " + numIf + "\n");
+	    System.out.println("Cyclomatic Complexity: " + cyclomaticComplexity + "\n");
 	}
 }
 
@@ -84,8 +109,6 @@ PARSER_END(PHP)
 
 TOKEN_MGR_DECLS : {
 	static String HereDocEnd;
-	static int comMultiLined = 0;
-    static int comSingleLined = 0;
 }
 
 <HTML_STATE> TOKEN [IGNORE_CASE]: {
@@ -103,9 +126,9 @@ TOKEN_MGR_DECLS : {
 |	"\t"
 |	"\n"
 |	"\r"
-|	<SLASH_SLASH_COMMENT: "//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")> {++comSingleLined;}
-|	<NUMERAL_COMMENT: "#" (~["\n","\r"])* ("\n" | "\r" | "\r\n")> {++comSingleLined;}
-|	<SLASH_STAR_COMMENT: "/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/"> {++comMultiLined;}
+|	<SLASH_SLASH_COMMENT: "//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+|	<NUMERAL_COMMENT: "#" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+|	<SLASH_STAR_COMMENT: "/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">
 }
 
 <DEFAULT> TOKEN :
@@ -333,7 +356,7 @@ void  ThrowStatement() : {}
 
 void TryBlock() : {}
 {
-	<TRY> CompoundStatement() (<CATCH> "(" <IDENTIFIER> Variable() ")" CompoundStatement())+
+	<TRY> CompoundStatement() (<CATCH> { numCatch++; } "(" <IDENTIFIER> Variable() ")" CompoundStatement())+
 }
 
 void EndOfStatement() :{}
@@ -357,7 +380,7 @@ void DefineStatement() : {}
 
 void LabeledStatement() : {}
 {
-	<CASE> Expression() ":" Statement() |
+	<CASE> { numCase++; } Expression() ":" Statement() |
 	<DFLT> ":" Statement()
 }
 
@@ -375,16 +398,16 @@ void CompoundStatement() : {}
 
 void SelectionStatement() : {}
 {
-	<IF> "(" Expression() ")" Statement() ( LOOKAHEAD(2) <ELSEIF> "(" Expression() ")" Statement() )* [ LOOKAHEAD(2) <ELSE> Statement() ] |
+	<IF> {numIf++; } "(" Expression() ")" Statement() ( LOOKAHEAD(2) <ELSEIF> { numElseif++; } "(" Expression() ")" Statement() )* [ LOOKAHEAD(2) <ELSE> Statement() ] |
 	<SWITCH> "(" Expression() ")" Statement()
 }
 
 void IterationStatement() : {}
 {
-	<WHILE> "(" Expression() ")" Statement() |
-	<DO> Statement() <WHILE> "(" Expression() ")" EndOfStatement() |
-	<FOR> "(" [ Expression() ] ";" [ Expression() ] ";" [ Expression() ] ")" Statement() |
-	<FOREACH> "(" [Expression() ] <AS> Variable() ( "=>" ["&"] Variable())? ")" Statement()
+	<WHILE> { numWhile++; } "(" Expression() ")" Statement() |
+	<DO> Statement() <WHILE> { numWhile++; } "(" Expression() ")" EndOfStatement() |
+	<FOR> { numFor++; } "(" [ Expression() ] ";" [ Expression() ] ";" [ Expression() ] ")" Statement() |
+	<FOREACH> { numForeach++; } "(" [Expression() ] <AS> Variable() ( "=>" ["&"] Variable())? ")" Statement()
 }
 
 void JumpStatement() : {}
@@ -418,11 +441,11 @@ void ClassMembers() : {}
 
 void MemberDeclaration() : {}
 {
-	LOOKAHEAD( (<FINAL> | Visibility() | <STATIC> )* <FUNCTION>) (<FINAL> | Visibility() | <STATIC> )* <FUNCTION> ["&"]  <IDENTIFIER> "(" [ParameterList()] ")" CompoundStatement() {nom++;}|
+	LOOKAHEAD( (<FINAL> | Visibility() | <STATIC> )* <FUNCTION>) (<FINAL> | Visibility() | <STATIC> )* <FUNCTION> ["&"]  <IDENTIFIER> "(" [ParameterList()] ")" CompoundStatement() |
 	LOOKAHEAD([Visibility()] <CONST>) [Visibility()] <CONST> <IDENTIFIER> "=" Expression()  EndOfStatement() |
 	(<VAR> | Visibility() | <STATIC> )* <DOLLAR> <VAR_NAME> [ "=" Expression() ] ("," <DOLLAR> <VAR_NAME> [ "=" Expression() ])* EndOfStatement() |
 	<GLOBAL> Variable() ("," Variable())* EndOfStatement() |
-	<ABSTRACT> [Visibility()] [<STATIC>] <FUNCTION> ["&"] <IDENTIFIER> "(" [ParameterList()] ")" EndOfStatement() {nom++;}
+	<ABSTRACT> [Visibility()] [<STATIC>] <FUNCTION> ["&"] <IDENTIFIER> "(" [ParameterList()] ")" EndOfStatement()
 
 }
 
@@ -438,7 +461,7 @@ void InterfaceMembers() : {}
 
 void InterfaceMember() : {}
 {
-	[<ABSTRACT>] <FUNCTION> ["&"]  <IDENTIFIER> "(" [ParameterList()] ")" ["{" "}" ] {nom++;}|
+	[<ABSTRACT>] <FUNCTION> ["&"]  <IDENTIFIER> "(" [ParameterList()] ")" ["{" "}" ]|
 	<DOLLAR> <VAR_NAME> ("," <DOLLAR> <VAR_NAME>)* |
 	<CONST> <IDENTIFIER> "=" Expression()
 }
@@ -485,18 +508,18 @@ void AssignmentOperator() : {}
 
 void ConditionalExpression() : {}
 {
-	Logical_Or_Expression() [LOOKAHEAD(2) "?" Expression() ":" Expression() ]
+	Logical_Or_Expression() [LOOKAHEAD(2) "?" { numQuestionMarks++; } Expression() ":" Expression() ]
 }
 
 
 void Logical_Or_Expression() : {}
 {
-	Logical_And_Expression() [LOOKAHEAD(2) "||" Logical_Or_Expression() ]
+	Logical_And_Expression() [LOOKAHEAD(2) "||" { numOr++; } Logical_Or_Expression() ]
 }
 
 void Logical_And_Expression() : {}
 {
-	BitwiseOrExpression() [LOOKAHEAD(2) "&&" Logical_And_Expression() ]
+	BitwiseOrExpression() [LOOKAHEAD(2) "&&" { numAnds++; } Logical_And_Expression() ]
 }
 
 void BitwiseOrExpression() : {}
@@ -506,7 +529,7 @@ void BitwiseOrExpression() : {}
 
 void BitwiseXorExpression() : {}
 {
-	BitwiseAndExpression() [LOOKAHEAD(2) "^" BitwiseXorExpression() ]
+	BitwiseAndExpression() [LOOKAHEAD(2) "^" { numXor++; } BitwiseXorExpression() ]
 }
 
 void BitwiseAndExpression() : {}
