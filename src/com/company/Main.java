@@ -77,7 +77,7 @@ public class Main {
     }
 
 
-    public double [] run(File file) {
+    public void run(File file) {
 
         try {
             this.file = file;
@@ -92,7 +92,6 @@ public class Main {
             System.out.println("PHP Metrics Extractor:  Encountered errors while parsing " + file.getName());
             System.out.println(e.getMessage());
         }
-        return new double[8];
 
     }
 
