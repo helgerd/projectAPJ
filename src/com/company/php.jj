@@ -254,11 +254,12 @@ public class PHP {
         setFunctDeclSpottedFalse();
     }
 
-    private static void increaseNumAttrInClass(boolean publ){
+    private static void increaseNumAttr(boolean publ){
+
+        noa++;
 
         if(cl == true){
             noaInClass++;
-
             if(publ == true){
                 pubAttrCount++;
             }
@@ -266,7 +267,7 @@ public class PHP {
 
     }
 
-    private static void increaseNumMet(boolean publ){
+    private static void increaseNumMetInClass(boolean publ){
 
             if(cl == true){
                 nomInClass++;
@@ -274,10 +275,10 @@ public class PHP {
                     pubMethCount++;
                 }
             }
-            else{
-                nom++;
-            }
+    }
 
+    private static void increaseNumMetCount(){
+         nom++;
     }
 
     private static void increaseLinesOfCode(){
@@ -309,12 +310,12 @@ public class PHP {
 
         if(functDecl == true){
 
-            increaseNumMet(true);
+            increaseNumMetInClass(true);
         }
 
         else if(attrDecl == true){
 
-            increaseNumAttrInClass(true);
+            increaseNumAttr(true);
         }
 
     }
@@ -670,13 +671,11 @@ void ClassMembers() : {}
 
 void MemberDeclaration() : {}
 {
-	LOOKAHEAD( (<FINAL> | Visibility() | <STATIC> )* <FUNCTION> ) {setFunctDeclSpottedTrue();} (<FINAL> | Visibility() | <STATIC> )* <FUNCTION>  ["&"]  <IDENTIFIER> "(" [ParameterList()] ")" {setFunctDeclEnd(); increaseNumMet(false);} CompoundStatement() {setInsideMethodFalse();}|
-	LOOKAHEAD([Visibility()] <CONST>) {setAttrDeclSpottedTrue();} [Visibility()] <CONST> <IDENTIFIER> "=" Expression()  EndOfStatement() {setAttrDeclSpottedFalse(); increaseNumAttrInClass(false);}|
-	(<VAR> {setAttrDeclSpottedTrue(); pubAttrCount++;} | Visibility() | <STATIC> )* <DOLLAR>  <VAR_NAME>  [ "=" Expression() ] ("," <DOLLAR>
-	 <VAR_NAME> [ "=" Expression() ])* EndOfStatement() {setAttrDeclSpottedFalse(); increaseNumAttrInClass(false);}|
-	<GLOBAL> Variable() ("," Variable())* EndOfStatement() {increaseNumAttrInClass(false);}|
-	<ABSTRACT> [Visibility()] [<STATIC>] <FUNCTION> {setFunctDeclSpottedTrue();}["&"] <IDENTIFIER> "(" [ParameterList()] ")" {setFunctDeclEnd(); increaseNumMet(false);} EndOfStatement() {setInsideMethodFalse();}
-
+	LOOKAHEAD( (<FINAL> | Visibility() | <STATIC> )* <FUNCTION> ) {setFunctDeclSpottedTrue();} (<FINAL> | Visibility() | <STATIC> )* <FUNCTION>  ["&"]  <IDENTIFIER> "(" [ParameterList()] ")" {setFunctDeclEnd();} CompoundStatement() {setInsideMethodFalse(); increaseNumMetCount();}|
+	LOOKAHEAD([Visibility()] <CONST>) {setAttrDeclSpottedTrue();} [Visibility()] <CONST> <IDENTIFIER> "=" Expression()  EndOfStatement() {setAttrDeclSpottedFalse();}|
+	{setAttrDeclSpottedTrue();} (<VAR> {increasePubElemCount();} | Visibility() | <STATIC>) * Variable() [ "=" Expression() ] ("," Variable() [ "=" Expression() ])* EndOfStatement()  {setAttrDeclSpottedFalse();} |
+	<GLOBAL> Variable() ("," Variable())* EndOfStatement() {increaseNumAttr(true);}|
+	<ABSTRACT>  [Visibility()] [<STATIC>] <FUNCTION> {setFunctDeclSpottedTrue();}["&"] <IDENTIFIER> "(" [ParameterList()] ")" {setFunctDeclEnd();} EndOfStatement() {setInsideMethodFalse();increaseNumMetCount();}
 }
 
 void InterfaceDeclaration() : {}
