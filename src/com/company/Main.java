@@ -82,16 +82,17 @@ public class Main {
         try {
             this.file = file;
             System.out.println("PHP Metrics Extractor: Started parsing file " + file.getName());
-            parser = new PHP(new FileInputStream(file));
-            parser.token_source.SwitchTo(PHPConstants.HTML_STATE);
-            parser.PhpPage();
-            System.out.println("PHP Metrics Extractor:  " + file.getName() + " parsed successfully.");
-            collectMetrics();
-        }
-        catch(ParseException | IOException e) {
+                parser = new PHP(new FileInputStream(file));
+                parser.token_source.SwitchTo(PHPConstants.HTML_STATE);
+                parser.PhpPage();
+                System.out.println("PHP Metrics Extractor:  " + file.getName() + " parsed successfully.");
+                collectMetrics();
+        } catch (ParseException | IOException e) {
             System.out.println("PHP Metrics Extractor:  Encountered errors while parsing " + file.getName());
             System.out.println(e.getMessage());
         }
+
+
         return new double[8];
 
     }
